@@ -1,6 +1,7 @@
 package br.edu.fa7.pomodoro.fragment;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.melnykov.fab.FloatingActionButton;
@@ -27,6 +29,7 @@ import br.edu.fa7.pomodoro.R;
 import br.edu.fa7.pomodoro.adapter.TaskAdapter;
 import br.edu.fa7.pomodoro.dao.TaskDao;
 import br.edu.fa7.pomodoro.model.Task;
+import br.edu.fa7.pomodoro.util.Chronometer;
 import br.edu.fa7.pomodoro.util.EditModeType;
 import br.edu.fa7.pomodoro.util.NotifyAdapter;
 import br.edu.fa7.pomodoro.util.RecyclerViewOnClickListener;
@@ -43,6 +46,10 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
     private TaskAdapter mTaskAdapter;
     private TaskDao mTaskDao;
     private FragmentTransaction mFragmentTransaction;
+    private Chronometer mChronometer;
+    private TextView mChronometerView;
+
+    private final int startPomodoroTime = 1500000; // 25min
 
     @Nullable
     @Override
@@ -65,9 +72,12 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         this.setupTaskAdapter();
         this.setupRecycleView(v);
 
+        mChronometerView = (TextView) v.findViewById(R.id.text_chronometer);
         mFloatingActionButton = (FloatingActionButton) v.findViewById(R.id.fragment_main_floating_add_button);
         mFloatingActionButton.setOnClickListener(this);
         mFloatingActionButton.attachToRecyclerView(mRecyclerView);
+
+        mChronometer = new Chronometer(startPomodoroTime, mChronometerView);
 
         return v;
     }
@@ -83,16 +93,24 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
     private void setupTaskAdapter() {
         mTaskAdapter = new TaskAdapter(mMainActivity, mTaskDao.findAll());
         mTaskAdapter.setListener(this);
-        mTaskAdapter.setPlayClickListener(this);
     }
 
     @Override
     public void onClick(View v, int position) {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("mode", EditModeType.EDIT_UPDATE_MODE);
-        bundle.putLong("id", mTaskAdapter.getItemId(position));
+        switch (v.getId()) {
+            case R.id.cardview_play_btn :
+                toggleChronometer();
+                break;
 
-        startFormFragment(bundle);
+            default:
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("mode", EditModeType.EDIT_UPDATE_MODE);
+                bundle.putLong("id", mTaskAdapter.getItemId(position));
+
+                startFormFragment(bundle);
+
+                break;
+        }
     }
 
     @Override
@@ -104,12 +122,17 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
                 bundle.putSerializable("mode", EditModeType.EDIT_NEW_MODE);
                 startFormFragment(bundle);
                 break;
-
-            default:
-                Toast.makeText(mMainActivity, "PLAY!!!", Toast.LENGTH_SHORT).show();
-                break;
         }
     }
+
+    private void toggleChronometer() {
+        if (mChronometer.isPlayning()) {
+            mChronometer.reset();
+        } else {
+            mChronometer.play();
+        }
+    }
+
 
     private void startFormFragment(Bundle bundle) {
         FormFragment formFragment = new FormFragment();

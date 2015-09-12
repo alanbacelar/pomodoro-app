@@ -29,7 +29,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private List<Task> list;
     private LayoutInflater layoutInflater;
     private RecyclerViewOnClickListener listener;
-    private View.OnClickListener playListener;
 
     public TaskAdapter(Context context, List<Task> list) {
         this.mContext = context;
@@ -39,10 +38,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     public void setListener(RecyclerViewOnClickListener listener) {
         this.listener = listener;
-    }
-
-    public void setPlayClickListener(View.OnClickListener listener) {
-        this.playListener = listener;
     }
 
     public List<Task> getList() {
@@ -69,8 +64,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         viewHolder.mTitle.setText(task.getTitle());
         viewHolder.mDescription.setText(task.getDescription());
         viewHolder.mTomatoes.setText(Integer.toString(task.getTomatoes()) + " tomatoes");
-
-        viewHolder.mPlayBtn.setOnClickListener(this.playListener);
 
         if (task.isDone()) {
             viewHolder.mTitle.setPaintFlags(viewHolder.mTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
@@ -101,6 +94,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             mTomatoes = (TextView) itemView.findViewById(R.id.cardview_task_tomatoes);
             mPlayBtn = (ImageButton) itemView.findViewById(R.id.cardview_play_btn);
             mLayout = (RelativeLayout) itemView.findViewById(R.id.cardview_layout);
+
+            mPlayBtn.setOnClickListener(this);
 
             itemView.getContext().getApplicationContext();
         }
