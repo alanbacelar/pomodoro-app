@@ -1,35 +1,26 @@
 package br.edu.fa7.pomodoro.fragment;
 
 import android.os.Bundle;
-import android.os.CountDownTimer;
+
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.melnykov.fab.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 import br.edu.fa7.pomodoro.R;
+import br.edu.fa7.pomodoro.activity.MainActivity;
 import br.edu.fa7.pomodoro.adapter.TaskAdapter;
 import br.edu.fa7.pomodoro.dao.TaskDao;
-import br.edu.fa7.pomodoro.model.Task;
-import br.edu.fa7.pomodoro.util.Chronometer;
 import br.edu.fa7.pomodoro.util.EditModeType;
 import br.edu.fa7.pomodoro.util.NotifyAdapter;
 import br.edu.fa7.pomodoro.util.RecyclerViewOnClickListener;
@@ -39,17 +30,15 @@ import br.edu.fa7.pomodoro.util.RecyclerViewOnClickListener;
  */
 public class MainFragment extends Fragment implements RecyclerViewOnClickListener, View.OnClickListener, NotifyAdapter {
 
-    private AppCompatActivity mMainActivity;
+    private MainActivity mMainActivity;
     private Toolbar mMainToolbar;
     private RecyclerView mRecyclerView;
     private FloatingActionButton mFloatingActionButton;
     private TaskAdapter mTaskAdapter;
     private TaskDao mTaskDao;
     private FragmentTransaction mFragmentTransaction;
-    private Chronometer mChronometer;
-    private TextView mChronometerView;
 
-    private final int startPomodoroTime = 1500000; // 25min
+    private final String TAG = "MainFragment";
 
     @Nullable
     @Override
@@ -57,7 +46,7 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
 
         View v = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mMainActivity = (AppCompatActivity) getActivity();
+        mMainActivity = (MainActivity) getActivity();
 
         // Adicionando a Toolbar
         mMainToolbar = (Toolbar) mMainActivity.findViewById(R.id.main_toolbar);
@@ -72,12 +61,9 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         this.setupTaskAdapter();
         this.setupRecycleView(v);
 
-        mChronometerView = (TextView) v.findViewById(R.id.text_chronometer);
         mFloatingActionButton = (FloatingActionButton) v.findViewById(R.id.fragment_main_floating_add_button);
         mFloatingActionButton.setOnClickListener(this);
         mFloatingActionButton.attachToRecyclerView(mRecyclerView);
-
-        mChronometer = new Chronometer(startPomodoroTime, mChronometerView);
 
         return v;
     }
@@ -99,7 +85,7 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
     public void onClick(View v, int position) {
         switch (v.getId()) {
             case R.id.cardview_play_btn :
-                toggleChronometer();
+                startFragment(new ChronometerFragment());
                 break;
 
             default:
@@ -125,15 +111,6 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         }
     }
 
-    private void toggleChronometer() {
-        if (mChronometer.isPlayning()) {
-            mChronometer.reset();
-        } else {
-            mChronometer.play();
-        }
-    }
-
-
     private void startFormFragment(Bundle bundle) {
         FormFragment formFragment = new FormFragment();
         formFragment.setArguments(bundle);
@@ -150,6 +127,7 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
     public void onResume() {
         super.onResume();
         dataChanged();
+
     }
 
     @Override
@@ -158,4 +136,5 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         mTaskAdapter.getList().addAll(mTaskDao.findAll());
         mTaskAdapter.notifyDataSetChanged();
     }
+
 }

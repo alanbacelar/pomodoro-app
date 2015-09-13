@@ -7,6 +7,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/app_name" >
@@ -16,6 +17,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.ChronometerService"/>
+
+        <receiver android:name=".brodcast.ChronometerBradcastReceiver">
+            <intent-filter>
+                <action android:name="br.edu.fa7.POMODORO_CHRONOMETER"/>
+                <category android:name="ANDROID.INTENT.CATEGORY.DEFAULT"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
