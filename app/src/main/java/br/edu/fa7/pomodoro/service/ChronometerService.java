@@ -6,59 +6,51 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.TextView;
 
+import java.util.concurrent.TimeUnit;
+
+import br.edu.fa7.pomodoro.listener.OnChronometerFinishListener;
+import br.edu.fa7.pomodoro.model.Task;
 import br.edu.fa7.pomodoro.util.Chronometer;
-import br.edu.fa7.pomodoro.util.ChronometerListener;
+import br.edu.fa7.pomodoro.listener.ChronometerListener;
 
 /**
  * Created by bruno on 26/08/15.
  */
-public class ChronometerService extends Service implements Runnable {
+public class ChronometerService extends Service implements ChronometerListener, OnChronometerFinishListener {
 
     private IBinder binder;
-    private boolean isPlaying = false;
+
     private Chronometer mChronometer;
-    private long mStartTime = 1500000; // 25 min.
+    private TextView mTextView;
+
+    public static final long START_TIME = 1500000; // 25 min.
+
+    private boolean mIsPlaying = false;
+    private OnChronometerFinishListener mFinishListener;
 
     private final String TAG = "ChronometerService";
 
     public ChronometerService() {
         this.binder = new LocalBinder();
-        this.mChronometer = new Chronometer(mStartTime);
+    }
+
+    public void onCreate() {
+        super.onCreate();
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand");
-        new Thread(this).start();
-        return Service.START_STICKY;
-    }
+    public void onTick(long millisUntilFinished) {
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished));
 
-    public void start() {
-        isPlaying = true;
-//        mChronometer.start();
-    }
+        Log.i(TAG, "Millis Until Finished: " + millisUntilFinished);
 
-    @Override
-    public void run() {
-        mChronometer.start();
-    }
+        if (mTextView != null) {
+            mTextView.setText(String.format("%02d:%02d", minutes, seconds));
+        }
 
-    public void setChronometerListener(ChronometerListener listener) {
-        mChronometer.setListener(listener);
-    }
-
-    public void setStartTime(long startTime) {
-        this.mStartTime = startTime;
-    }
-
-    public boolean isPlaying() {
-        return isPlaying;
-   }
-
-    public void stop() {
-        this.isPlaying = false;
-        mChronometer.cancel();
     }
 
     @Nullable
@@ -71,5 +63,51 @@ public class ChronometerService extends Service implements Runnable {
         public ChronometerService getService() {
             return ChronometerService.this;
         }
+    }
+
+    public void continuePlaying(TextView editText) {
+        this.mTextView = editText;
+    }
+    public void setFinishListener(OnChronometerFinishListener listener) { this.mFinishListener = listener; }
+
+
+    public void play(long startTime, Task task, TextView editText) {
+        this.mTextView = editText;
+
+        if ( !this.mIsPlaying) {
+            this.mIsPlaying = true;
+
+            this.mChronometer = new Chronometer(startTime, getApplicationContext());
+            this.mChronometer.setListener(this);
+            this.mChronometer.setOnChronometerFinishListener(this);
+            this.mChronometer.setTask(task);
+            this.mChronometer.start();
+        }
+    }
+
+    public void play(Task task, TextView editText) {
+        this.play(START_TIME, task, editText);
+    }
+
+    public boolean isPlaying() { return mIsPlaying; }
+
+    public void stop() {
+        this.mChronometer.cancel();
+        this.onChronometerFinish(true);
+    }
+
+    @Override
+    public void onChronometerFinish(boolean byUser) {
+        this.mIsPlaying = false;
+
+        if (this.mFinishListener != null) {
+            this.mFinishListener.onChronometerFinish(byUser);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stop();
     }
 }

@@ -71,11 +71,13 @@ public class TaskDao extends GenericDAO<Task> {
         String description = cursor.getString(cursor.getColumnIndex("description"));
         int tomatoes = cursor.getInt(cursor.getColumnIndex("tomatoes"));
         int done = cursor.getInt(cursor.getColumnIndex("done"));
+        int done_tomatoes = cursor.getInt(cursor.getColumnIndex("done_tomatoes"));
 
         boolean isDone = (done > 0);
 
         Task task = new Task(id, title, description, tomatoes);
         task.setDone(isDone);
+        task.setDoneTomatoes(done_tomatoes);
 
         return task;
     }
@@ -87,6 +89,7 @@ public class TaskDao extends GenericDAO<Task> {
         values.put("title", obj.getTitle());
         values.put("description", obj.getDescription());
         values.put("tomatoes", obj.getTomatoes());
+        values.put("done_tomatoes", obj.getDoneTomatoes());
 
         int done = (obj.isDone()) ? 1 : 0;
         values.put("done", done);

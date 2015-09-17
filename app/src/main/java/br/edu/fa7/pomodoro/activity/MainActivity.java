@@ -17,80 +17,60 @@ import br.edu.fa7.pomodoro.R;
 import br.edu.fa7.pomodoro.fragment.ChronometerFragment;
 import br.edu.fa7.pomodoro.fragment.MainFragment;
 import br.edu.fa7.pomodoro.service.ChronometerService;
-import br.edu.fa7.pomodoro.util.ChronometerListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final MainFragment mMainFragment;
-    private final ChronometerFragment mChronometerFragment;
-
     private FragmentManager mFragmentManager;
     private ChronometerService mChronometerService;
-    private ChronometerListener mChronometerListener;
     private FragmentTransaction mFragmentTransaction;
 
     private boolean mIsServiceBounded = false;
+
+    private final String TAG = "MainActivity";
+    private final MainFragment mMainFragment;
+    private final ChronometerFragment mChronometerFragment;
 
     public MainActivity() {
         this.mMainFragment = new MainFragment();
         this.mChronometerFragment = new ChronometerFragment();
     }
 
-    public MainFragment getMainFragment() {
-        return mMainFragment;
-    }
+    public MainFragment getMainFragment() { return mMainFragment; }
+    public ChronometerService getChronometerService() { return mChronometerService; }
+    public boolean isChronometerServiceBounded() { return mIsServiceBounded; }
 
-    public void setChronometerListener(ChronometerListener listener) {
-        mChronometerListener = listener;
-    }
-
-    public boolean isChronometerServiceBounded() {
-        return mIsServiceBounded;
-    }
-
-    public ServiceConnection getChronometerServiceConnection() {
-        return mServiceConnection;
-    }
-
-    public ChronometerService getChronometerService() {
-        return mChronometerService;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Intent it = new Intent(this, ChronometerService.class);
+        bindService(it, mServiceConnection, Service.BIND_AUTO_CREATE);
+
+        setupFragment();
+    }
+
+    private void setupFragment() {
+        Fragment fragment = (mIsServiceBounded && mChronometerService.isPlaying()) ? mChronometerFragment : mMainFragment;
 
         mFragmentManager = getSupportFragmentManager();
-
         mFragmentTransaction = mFragmentManager.beginTransaction();
-
-        Fragment fragment = (isChronometerServiceBounded() && mChronometerService.isPlaying()) ? mChronometerFragment : mMainFragment;
         mFragmentTransaction.replace(R.id.main_content, fragment);
-
         mFragmentTransaction.commit();
     }
 
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Intent it = new Intent(this, ChronometerService.class);
-        bindService(it, mServiceConnection, Service.BIND_AUTO_CREATE);
-
-        if (!isChronometerServiceBounded()) {
-            startService(it);
-        }
-
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         unbindService(mServiceConnection);
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -114,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             ChronometerService.LocalBinder binder = (ChronometerService.LocalBinder) service;
             mChronometerService = binder.getService();
-            mChronometerService.setChronometerListener(mChronometerListener);
-
             mIsServiceBounded = true;
         }
 

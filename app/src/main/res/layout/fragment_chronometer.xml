@@ -18,12 +18,19 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="00:00"
+            android:text="Task Title"
+            android:textSize="22sp"
+            android:id="@+id/fragment_task_title"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textAlignment="center"
             android:textSize="56sp"
             android:id="@+id/fragment_chronometer_text"
-            />
+            android:gravity="center_horizontal" />
 
 
         <Button

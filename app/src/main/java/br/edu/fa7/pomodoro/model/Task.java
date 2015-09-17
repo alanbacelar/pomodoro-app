@@ -9,6 +9,7 @@ public class Task {
     private String title;
     private String description;
     private int tomatoes = 1;
+    private int doneTomatoes = 0;
     private boolean done = false;
 
     public Task(String title, String description, int tomatoes) {
@@ -61,6 +62,23 @@ public class Task {
     public void setTomatoes(int tomatoes) {
         this.tomatoes = tomatoes;
     }
+
+    public int getDoneTomatoes() {
+        return doneTomatoes;
+    }
+
+    public void setDoneTomatoes(int doneTomatoes) {
+        this.doneTomatoes = doneTomatoes;
+    }
+
+    public  void doneTomatoes(int tomatoes) {
+        this.setDoneTomatoes( getDoneTomatoes() + tomatoes );
+
+        if (getDoneTomatoes() >= getTomatoes()) {
+            setDone(true);
+        }
+    }
+
 
     public boolean isDone() {
         return done;

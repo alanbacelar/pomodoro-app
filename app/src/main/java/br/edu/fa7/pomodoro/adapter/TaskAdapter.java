@@ -63,11 +63,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         viewHolder.mTitle.setText(task.getTitle());
         viewHolder.mDescription.setText(task.getDescription());
-        viewHolder.mTomatoes.setText(Integer.toString(task.getTomatoes()) + " tomatoes");
+        viewHolder.mTomatoes.setText(
+                task.getDoneTomatoes() + " done(s) of " + task.getTomatoes() + " tomatoes"
+        );
 
         if (task.isDone()) {
             viewHolder.mTitle.setPaintFlags(viewHolder.mTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             viewHolder.mLayout.setBackgroundColor(Color.LTGRAY);
+            viewHolder.mPlayBtn.setEnabled(false);
+            viewHolder.mPlayBtn.setVisibility(View.INVISIBLE);
+        } else {
+            viewHolder.mPlayBtn.setOnClickListener(viewHolder);
         }
     }
 
@@ -94,8 +100,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             mTomatoes = (TextView) itemView.findViewById(R.id.cardview_task_tomatoes);
             mPlayBtn = (ImageButton) itemView.findViewById(R.id.cardview_play_btn);
             mLayout = (RelativeLayout) itemView.findViewById(R.id.cardview_layout);
-
-            mPlayBtn.setOnClickListener(this);
 
             itemView.getContext().getApplicationContext();
         }

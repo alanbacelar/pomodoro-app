@@ -20,7 +20,7 @@
 
         <service android:name=".service.ChronometerService"/>
 
-        <receiver android:name=".brodcast.ChronometerBradcastReceiver">
+        <receiver android:name=".brodcast.ChronometerBR">
             <intent-filter>
                 <action android:name="br.edu.fa7.POMODORO_CHRONOMETER"/>
                 <category android:name="ANDROID.INTENT.CATEGORY.DEFAULT"/>

@@ -1,5 +1,9 @@
 package br.edu.fa7.pomodoro.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import android.support.annotation.Nullable;
@@ -9,6 +13,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +43,9 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
     private TaskDao mTaskDao;
     private FragmentTransaction mFragmentTransaction;
 
+    private long mChronometerTime;
+    private boolean mIsChronometerStarded;
+
     private final String TAG = "MainFragment";
 
     @Nullable
@@ -48,7 +56,6 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
 
         mMainActivity = (MainActivity) getActivity();
 
-        // Adicionando a Toolbar
         mMainToolbar = (Toolbar) mMainActivity.findViewById(R.id.main_toolbar);
         mMainToolbar.setTitle(R.string.app_name);
         mMainActivity.setSupportActionBar(mMainToolbar);
@@ -60,6 +67,11 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
 
         this.setupTaskAdapter();
         this.setupRecycleView(v);
+
+        if (getArguments() != null) {
+            this.mChronometerTime = getArguments().getLong("chronometerTime", 0);
+            this.mIsChronometerStarded = getArguments().getBoolean("isChronometerPlaying", false);
+        }
 
         mFloatingActionButton = (FloatingActionButton) v.findViewById(R.id.fragment_main_floating_add_button);
         mFloatingActionButton.setOnClickListener(this);
@@ -81,15 +93,34 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         mTaskAdapter.setListener(this);
     }
 
+    private void startFormFragment(Bundle bundle) {
+        FormFragment formFragment = new FormFragment();
+        formFragment.setArguments(bundle);
+
+        startFragment(formFragment);
+    }
+
+    private void startFragment(Fragment fragment) {
+        mFragmentTransaction.replace(R.id.main_content, fragment);
+        mFragmentTransaction.commit();
+    }
+
     @Override
     public void onClick(View v, int position) {
+        Bundle bundle = new Bundle();
+
         switch (v.getId()) {
             case R.id.cardview_play_btn :
-                startFragment(new ChronometerFragment());
+                bundle.putLong("taskID", this.mTaskAdapter.getItemId(position));
+
+                Fragment fragment = new ChronometerFragment();
+                fragment.setArguments(bundle);
+
+                startFragment(fragment);
+
                 break;
 
             default:
-                Bundle bundle = new Bundle();
                 bundle.putSerializable("mode", EditModeType.EDIT_UPDATE_MODE);
                 bundle.putLong("id", mTaskAdapter.getItemId(position));
 
@@ -111,23 +142,10 @@ public class MainFragment extends Fragment implements RecyclerViewOnClickListene
         }
     }
 
-    private void startFormFragment(Bundle bundle) {
-        FormFragment formFragment = new FormFragment();
-        formFragment.setArguments(bundle);
-
-        startFragment(formFragment);
-    }
-
-    private void startFragment(Fragment fragment) {
-        mFragmentTransaction.replace(R.id.main_content, fragment);
-        mFragmentTransaction.commit();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
         dataChanged();
-
     }
 
     @Override

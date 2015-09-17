@@ -39,6 +39,7 @@ public class FormFragment extends Fragment implements View.OnClickListener {
     private EditText mTomatoes;
     private Button mRemoveBtn;
     private CheckBox mDoneCheck;
+    private boolean mWasDone = false;
 
     @Nullable
     @Override
@@ -101,6 +102,7 @@ public class FormFragment extends Fragment implements View.OnClickListener {
 
         if (id != null) {
             mTask = mTaskDao.find(id);
+            mWasDone = mTask.isDone();
         } else {
             Toast.makeText(mMainActiivty, "Task not found", Toast.LENGTH_SHORT).show();
         }
@@ -129,6 +131,15 @@ public class FormFragment extends Fragment implements View.OnClickListener {
         boolean done = mDoneCheck.isChecked();
 
         Task task = new Task(title, description, tomatoes);
+        task.setDoneTomatoes(mTask.getDoneTomatoes());
+
+        if (mWasDone != done) {
+            task.setDoneTomatoes(0);
+        }
+
+        if (!mWasDone && done) {
+            task.setDoneTomatoes(task.getTomatoes());
+        }
 
         if (task.isValid()) {
             switch (mMode) {
