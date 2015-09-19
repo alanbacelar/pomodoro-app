@@ -25,8 +25,7 @@ public class ChronometerService extends Service implements ChronometerListener, 
     private Chronometer mChronometer;
     private TextView mTextView;
 
-//    public static final long START_TIME = 1500000; // 25 min.
-    public static final long START_TIME = 10000; // 25 min.
+    public static final long START_TIME = 1500000; // 25 min.
 
     private boolean mIsPlaying = false;
     private OnChronometerFinishListener mFinishListener;
