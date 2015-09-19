@@ -65,11 +65,12 @@ public class MainActivity extends AppCompatActivity {
         mFragmentTransaction.commit();
     }
 
-
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mChronometerService.stopService();
         unbindService(mServiceConnection);
+
+        super.onDestroy();
     }
 
     @Override

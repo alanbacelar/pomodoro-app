@@ -1,9 +1,11 @@
 package br.edu.fa7.pomodoro.fragment;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -25,7 +27,7 @@ import br.edu.fa7.pomodoro.util.EditModeType;
 /**
  * Created by bruno on 31/08/15.
  */
-public class FormFragment extends Fragment implements View.OnClickListener {
+public class FormFragment extends Fragment implements View.OnClickListener, DialogInterface.OnClickListener  {
 
     private AppCompatActivity mMainActiivty;
     private Toolbar mMainToolbar;
@@ -41,9 +43,11 @@ public class FormFragment extends Fragment implements View.OnClickListener {
     private CheckBox mDoneCheck;
     private boolean mWasDone = false;
 
+    private final String TAG = "FormFragment";
+
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
         View v = inflater.inflate(R.layout.fragment_form, container, false);
 
@@ -162,20 +166,26 @@ public class FormFragment extends Fragment implements View.OnClickListener {
     }
 
     private void remove() {
-        Long id = mBundle.getLong("id");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActiivty);
 
-        if (id != null) {
-            Task task = new Task(id);
-            mTaskDao.delete(task);
+        builder.setTitle("Are sure?")
+                .setMessage("Do you really want delete this task?")
+                .setPositiveButton("Yes", this)
+                .setNegativeButton("No", this);
 
-            ((MainActivity) mMainActiivty).getMainFragment().dataChanged();
-        } else {
-            Toast.makeText(mMainActiivty, "Task not found!", Toast.LENGTH_SHORT).show();
-        }
+        builder.create().show();
 
-        finish();
     }
 
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        Log.d(TAG, "which: " + which);
+
+        if (which == -1) {
+            mTaskDao.delete(mTask);
+            finish();
+        }
+    }
 
     public void onDoneCheckBoxChange() {
         mTitle.setEnabled(!mDoneCheck.isChecked());

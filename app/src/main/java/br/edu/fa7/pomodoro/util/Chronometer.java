@@ -2,10 +2,14 @@ package br.edu.fa7.pomodoro.util;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Context;
+import android.content.Intent;
 import android.os.CountDownTimer;
 
 import br.edu.fa7.pomodoro.R;
+import br.edu.fa7.pomodoro.activity.MainActivity;
 import br.edu.fa7.pomodoro.listener.ChronometerListener;
 import br.edu.fa7.pomodoro.listener.OnChronometerFinishListener;
 import br.edu.fa7.pomodoro.model.Task;
@@ -69,7 +73,19 @@ public class Chronometer extends CountDownTimer {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
-                .setContentText("Pomodoro finalizado para task #" + ID + ".");
+                .setContentText("Pomodoro finalizado para task #" + ID + ".")
+                .setAutoCancel(true);
+
+
+        Intent it = new Intent(mContext, MainActivity.class);
+
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(mContext);
+        taskStackBuilder.addParentStack(MainActivity.class);
+        taskStackBuilder.addNextIntent(it);
+
+        PendingIntent pendingIntent = taskStackBuilder
+                .getPendingIntent(1, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
 
         this.mNotificationManager.notify(1, builder.build());
     }

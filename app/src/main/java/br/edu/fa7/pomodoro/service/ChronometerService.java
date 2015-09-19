@@ -25,7 +25,8 @@ public class ChronometerService extends Service implements ChronometerListener, 
     private Chronometer mChronometer;
     private TextView mTextView;
 
-    public static final long START_TIME = 1500000; // 25 min.
+//    public static final long START_TIME = 1500000; // 25 min.
+    public static final long START_TIME = 10000; // 25 min.
 
     private boolean mIsPlaying = false;
     private OnChronometerFinishListener mFinishListener;
@@ -70,7 +71,6 @@ public class ChronometerService extends Service implements ChronometerListener, 
     }
     public void setFinishListener(OnChronometerFinishListener listener) { this.mFinishListener = listener; }
 
-
     public void play(long startTime, Task task, TextView editText) {
         this.mTextView = editText;
 
@@ -92,8 +92,15 @@ public class ChronometerService extends Service implements ChronometerListener, 
     public boolean isPlaying() { return mIsPlaying; }
 
     public void stop() {
-        this.mChronometer.cancel();
+        if (this.mChronometer != null) {
+            this.mChronometer.cancel();
+        }
+
         this.onChronometerFinish(true);
+    }
+
+    public void stopService() {
+        this.mFinishListener = null;
     }
 
     @Override
@@ -107,7 +114,7 @@ public class ChronometerService extends Service implements ChronometerListener, 
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stop();
+        super.onDestroy();
     }
 }
